@@ -1,100 +1,231 @@
 blueprint:
-  name: Philips Hue Wall Switch Module (RDM004) - Press / Hold / Release (Zigbee2MQTT)
-  description: >
-    Reacts to raw Zigbee2MQTT action payloads from a Philips Hue Wall Switch Module.
-    Supports left/right press, hold, press_release, and hold_release.
-  domain: automation
+  homeassistant:
+    min_version: 2024.6.0
   author: ChatGPT
+  name: Philips Hue Wall Switch Module (RDM004) - Rocker with Hold (Zigbee2MQTT)
+  description: >
+    Reacts to actions from the Philips Hue Wall Switch (RDM004) via Zigbee2MQTT.
+    Supported actions: left_press, left_hold, left_press_release, left_hold_release,
+    right_press, right_hold, right_press_release, right_hold_release.
+
+  domain: automation
 
   input:
     trigger_topic:
       name: MQTT action topic
-      description: "Example: zigbee2mqtt/YOUR_DEVICE_NAME/action"
+      description: >
+        Enter the exact Zigbee2MQTT action topic for this device.
+        Example: zigbee2mqtt/my_hue_wall_switch/action
       selector:
         text: {}
 
     left_press_action:
-      name: Left - Press
+      name: Left – Press
+      description: Choose action(s) to run when left_press is triggered
       default: []
       selector:
         action: {}
 
     left_hold_action:
-      name: Left - Hold
+      name: Left – Hold
+      description: Choose action(s) to run when left_hold is triggered
       default: []
       selector:
         action: {}
 
-    left_press_release_action:
-      name: Left - Press Release
+    left_release_action:
+      name: Left – Press Release
+      description: Choose action(s) to run when left_press_release is triggered
       default: []
       selector:
         action: {}
 
     left_hold_release_action:
-      name: Left - Hold Release
+      name: Left – Hold Release
+      description: Choose action(s) to run when left_hold_release is triggered
       default: []
       selector:
         action: {}
 
     right_press_action:
-      name: Right - Press
+      name: Right – Press
+      description: Choose action(s) to run when right_press is triggered
       default: []
       selector:
         action: {}
 
     right_hold_action:
-      name: Right - Hold
+      name: Right – Hold
+      description: Choose action(s) to run when right_hold is triggered
       default: []
       selector:
         action: {}
 
-    right_press_release_action:
-      name: Right - Press Release
+    right_release_action:
+      name: Right – Press Release
+      description: Choose action(s) to run when right_press_release is triggered
       default: []
       selector:
         action: {}
 
     right_hold_release_action:
-      name: Right - Hold Release
+      name: Right – Hold Release
+      description: Choose action(s) to run when right_hold_release is triggered
       default: []
       selector:
         action: {}
+
+    loop_options_section:
+      name: Loop-Optionen
+      icon: mdi:cog-outline
+      collapsed: true
+      input:
+        helper_enable_loops:
+          name: activate Loops
+          description: When active, the triggered action sequence is executed repeatedly.
+          default: false
+          selector:
+            boolean: {}
+
+        helper_max_loops:
+          name: Number of max Loops
+          description: How often should the action run in a loop?
+          default: 3
+          selector:
+            number:
+              min: 1
+              max: 50
+              step: 1
+              mode: box
+
+        helper_loop_delay:
+          name: Delay in between loops
+          description: Time between two repetitions
+          default: 200
+          selector:
+            number:
+              mode: box
+              unit_of_measurement: ms
+
+mode: single
+max: 10
 
 trigger:
   - platform: mqtt
     topic: !input trigger_topic
 
-mode: single
-max_exceeded: silent
+condition: []
 
 action:
   - variables:
       trig: "{{ trigger.payload }}"
+      enable_loops: !input helper_enable_loops
+      max_loops: !input helper_max_loops
+      loop_delay_ms: !input helper_loop_delay
 
   - choose:
-      - conditions: "{{ trig == 'left_press' }}"
+      # LEFT PRESS
+      - conditions: "{{ trig == 'left_press' and not enable_loops }}"
         sequence: !input left_press_action
+      - conditions: "{{ trig == 'left_press' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input left_press_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
-      - conditions: "{{ trig == 'left_hold' }}"
+      # LEFT HOLD
+      - conditions: "{{ trig == 'left_hold' and not enable_loops }}"
         sequence: !input left_hold_action
+      - conditions: "{{ trig == 'left_hold' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input left_hold_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
-      - conditions: "{{ trig == 'left_press_release' }}"
-        sequence: !input left_press_release_action
+      # LEFT PRESS RELEASE
+      - conditions: "{{ trig == 'left_press_release' and not enable_loops }}"
+        sequence: !input left_release_action
+      - conditions: "{{ trig == 'left_press_release' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input left_release_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
-      - conditions: "{{ trig == 'left_hold_release' }}"
+      # LEFT HOLD RELEASE
+      - conditions: "{{ trig == 'left_hold_release' and not enable_loops }}"
         sequence: !input left_hold_release_action
+      - conditions: "{{ trig == 'left_hold_release' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input left_hold_release_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
-      - conditions: "{{ trig == 'right_press' }}"
+      # RIGHT PRESS
+      - conditions: "{{ trig == 'right_press' and not enable_loops }}"
         sequence: !input right_press_action
+      - conditions: "{{ trig == 'right_press' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input right_press_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
-      - conditions: "{{ trig == 'right_hold' }}"
+      # RIGHT HOLD
+      - conditions: "{{ trig == 'right_hold' and not enable_loops }}"
         sequence: !input right_hold_action
+      - conditions: "{{ trig == 'right_hold' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input right_hold_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
-      - conditions: "{{ trig == 'right_press_release' }}"
-        sequence: !input right_press_release_action
+      # RIGHT PRESS RELEASE
+      - conditions: "{{ trig == 'right_press_release' and not enable_loops }}"
+        sequence: !input right_release_action
+      - conditions: "{{ trig == 'right_press_release' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input right_release_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
-      - conditions: "{{ trig == 'right_hold_release' }}"
+      # RIGHT HOLD RELEASE
+      - conditions: "{{ trig == 'right_hold_release' and not enable_loops }}"
         sequence: !input right_hold_release_action
+      - conditions: "{{ trig == 'right_hold_release' and enable_loops }}"
+        sequence:
+          - repeat:
+              count: "{{ max_loops | int }}"
+              sequence:
+                - choose: []
+                  default: !input right_hold_release_action
+                - delay:
+                    milliseconds: "{{ loop_delay_ms | int }}"
 
     default: []
