@@ -1,0 +1,100 @@
+blueprint:
+  name: Philips Hue Wall Switch Module (RDM004) - Press / Hold / Release (Zigbee2MQTT)
+  description: >
+    Reacts to raw Zigbee2MQTT action payloads from a Philips Hue Wall Switch Module.
+    Supports left/right press, hold, press_release, and hold_release.
+  domain: automation
+  author: ChatGPT
+
+  input:
+    trigger_topic:
+      name: MQTT action topic
+      description: Example: zigbee2mqtt/YOUR_DEVICE_NAME/action
+      selector:
+        text: {}
+
+    left_press_action:
+      name: Left - Press
+      default: []
+      selector:
+        action: {}
+
+    left_hold_action:
+      name: Left - Hold
+      default: []
+      selector:
+        action: {}
+
+    left_press_release_action:
+      name: Left - Press Release
+      default: []
+      selector:
+        action: {}
+
+    left_hold_release_action:
+      name: Left - Hold Release
+      default: []
+      selector:
+        action: {}
+
+    right_press_action:
+      name: Right - Press
+      default: []
+      selector:
+        action: {}
+
+    right_hold_action:
+      name: Right - Hold
+      default: []
+      selector:
+        action: {}
+
+    right_press_release_action:
+      name: Right - Press Release
+      default: []
+      selector:
+        action: {}
+
+    right_hold_release_action:
+      name: Right - Hold Release
+      default: []
+      selector:
+        action: {}
+
+trigger:
+  - platform: mqtt
+    topic: !input trigger_topic
+
+mode: single
+max_exceeded: silent
+
+action:
+  - variables:
+      trig: "{{ trigger.payload }}"
+
+  - choose:
+      - conditions: "{{ trig == 'left_press' }}"
+        sequence: !input left_press_action
+
+      - conditions: "{{ trig == 'left_hold' }}"
+        sequence: !input left_hold_action
+
+      - conditions: "{{ trig == 'left_press_release' }}"
+        sequence: !input left_press_release_action
+
+      - conditions: "{{ trig == 'left_hold_release' }}"
+        sequence: !input left_hold_release_action
+
+      - conditions: "{{ trig == 'right_press' }}"
+        sequence: !input right_press_action
+
+      - conditions: "{{ trig == 'right_hold' }}"
+        sequence: !input right_hold_action
+
+      - conditions: "{{ trig == 'right_press_release' }}"
+        sequence: !input right_press_release_action
+
+      - conditions: "{{ trig == 'right_hold_release' }}"
+        sequence: !input right_hold_release_action
+
+    default: []
