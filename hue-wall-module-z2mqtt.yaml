@@ -9,7 +9,7 @@ blueprint:
   input:
     trigger_topic:
       name: MQTT action topic
-      description: Example: zigbee2mqtt/YOUR_DEVICE_NAME/action
+      description: "Example: zigbee2mqtt/YOUR_DEVICE_NAME/action"
       selector:
         text: {}
 
